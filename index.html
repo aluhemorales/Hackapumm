@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>EcoBelleza · Microplásticos en el maquillaje</title>
+<meta name="description" content="Descubrí qué maquillajes contienen microplásticos, escaneá tus productos, encontrá puntos de reciclaje en Argentina y sumate al cambio.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💧</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<noscript><style>.intro-splash{display:none!important;}</style></noscript>
+
+<div class="intro-splash" id="intro-splash">
+  <canvas id="intro-canvas" aria-hidden="true"></canvas>
+  <button class="intro-skip" id="intro-skip" type="button">Saltar intro</button>
+  <div class="intro-copy">
+    <p class="intro-eyebrow" id="intro-eyebrow"></p>
+    <h1 class="intro-title" id="intro-title" aria-live="polite"></h1>
+    <button class="btn btn-primary intro-enter" id="intro-enter" type="button">Comenzar</button>
+  </div>
+  <div class="intro-progress"><div class="intro-progress-bar" id="intro-progress-bar"></div></div>
+</div>
+
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<div class="bg-blobs" aria-hidden="true">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <span class="blob blob-3"></span>
+  <span class="blob blob-4"></span>
+</div>
+
+<a class="skip-link" href="#main">Saltar al contenido</a>
+
+<header class="site-header" id="top">
+  <div class="header-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">💧</span>
+      <span class="brand-name">Eco<em>Belleza</em></span>
+    </a>
+
+    <nav class="main-nav" id="main-nav" aria-label="Navegación principal">
+      <a href="#informe" data-i18n="nav.informe">Informe</a>
+      <a href="#videos" data-i18n="nav.videos">Videos</a>
+      <a href="#escanear" data-i18n="nav.escanear">Escanear</a>
+      <a href="#base-datos" data-i18n="nav.base">Base de datos</a>
+      <a href="#mapa" data-i18n="nav.mapa">Mapa</a>
+      <a href="#propuesta" data-i18n="nav.propuesta">Propuestas</a>
+      <a href="#actividades" data-i18n="nav.actividades">Jugá y aprendé</a>
+      <a href="#opiniones" data-i18n="nav.opiniones">Opiniones</a>
+    </nav>
+
+    <div class="header-actions">
+      <button id="lang-toggle" class="chip-btn" type="button" aria-label="Cambiar idioma">
+        <span data-lang-label>EN</span>
+      </button>
+      <button id="theme-toggle" class="chip-btn" type="button" aria-label="Cambiar tema">
+        <span id="theme-icon">☀️</span>
+      </button>
+      <button id="nav-toggle" class="icon-btn nav-burger" type="button" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero" id="inicio">
+    <div class="hero-inner">
+      <p class="eyebrow" data-i18n="hero.eyebrow">Proyecto educativo · Chicas en Tecnología</p>
+      <h1 data-i18n="hero.title">Lo que te ponés en la piel, <span>termina en el agua.</span></h1>
+      <p class="hero-lead" data-i18n="hero.lead">
+        Cada día, miles de partículas de plástico invisibles salen de tu neceser directo al desagüe. Entendé el problema, escaneá tus productos y encontrá alternativas reales en Argentina.
+      </p>
+      <div class="hero-cta">
+        <a href="#escanear" class="btn btn-primary" data-i18n="hero.cta1">📷 Escanear un producto</a>
+        <a href="#informe" class="btn btn-ghost" data-i18n="hero.cta2">Leer el informe</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>5mm</strong><span data-i18n="hero.stat1">tamaño máximo de un microplástico</span></div>
+        <div class="stat"><strong>+90%</strong><span data-i18n="hero.stat2">de algunos cosméticos puede ser plástico</span></div>
+        <div class="stat"><strong>0</strong><span data-i18n="hero.stat3">filtros que los retienen del todo</span></div>
+      </div>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">
+      <span data-i18n="hero.scroll"></span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ===================== REFLEXIONEMOS (carrusel) ===================== -->
+  <section class="section section-dark" id="reflexionemos">
+    <div class="section-inner">
+      <h2 data-i18n="reflex.title">Reflexionemos</h2>
+      <p class="section-lead" data-i18n="reflex.lead">Tres escenas, un mismo destino: del espejo de tu baño al fondo del mar.</p>
+
+      <div class="carousel" id="carousel" aria-roledescription="carrusel">
+        <div class="carousel-track" id="carousel-track">
+
+          <article class="slide" aria-hidden="false">
+            <div class="slide-art" data-art="desechos">
+              <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 130 Q50 110 100 130 T200 130 V160 H0 Z" fill="var(--sea-700)"/>
+                <circle cx="40" cy="60" r="4" fill="var(--coral)"/>
+                <circle cx="70" cy="90" r="3" fill="var(--plastic-yellow)"/>
+                <circle cx="110" cy="50" r="5" fill="var(--seafoam)"/>
+                <circle cx="140" cy="80" r="3" fill="var(--coral)"/>
+                <circle cx="160" cy="40" r="4" fill="var(--plastic-yellow)"/>
+                <circle cx="30" cy="100" r="2.5" fill="var(--seafoam)"/>
+                <circle cx="90" cy="30" r="3" fill="var(--coral)"/>
+                <rect x="20" y="70" width="14" height="20" rx="3" fill="var(--sand)" opacity=".8"/>
+                <rect x="150" y="95" width="10" height="16" rx="2" fill="var(--sand)" opacity=".6"/>
+              </svg>
+            </div>
+            <div class="slide-copy">
+              <h3 data-i18n="reflex.s1.title">Invisibles, pero ahí están</h3>
+              <p data-i18n="reflex.s1.text">Un microplástico mide menos de 5mm. No lo ves a simple vista, pero cada lavado de cara puede liberar miles.</p>
+            </div>
+          </article>
+
+          <article class="slide" aria-hidden="true">
+            <div class="slide-art" data-art="maquillaje">
+              <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <rect x="60" y="20" width="20" height="50" rx="6" fill="var(--coral)"/>
+                <rect x="64" y="14" width="12" height="10" rx="2" fill="var(--sand)"/>
+                <circle cx="120" cy="55" r="22" fill="var(--sand)"/>
+                <circle cx="120" cy="55" r="14" fill="var(--plastic-yellow)"/>
+                <rect x="30" y="90" width="34" height="16" rx="8" fill="var(--seafoam)"/>
+                <rect x="140" y="95" width="30" height="10" rx="5" fill="var(--coral)" opacity=".8"/>
+                <path d="M0 140 H200 V160 H0 Z" fill="var(--sea-700)"/>
+              </svg>
+            </div>
+            <div class="slide-copy">
+              <h3 data-i18n="reflex.s2.title">Tu neceser, bajo la lupa</h3>
+              <p data-i18n="reflex.s2.text">Exfoliantes, brillos, bases "smooth finish": muchos productos de belleza cotidianos llevan plástico agregado a propósito.</p>
+            </div>
+          </article>
+
+          <article class="slide" aria-hidden="true">
+            <div class="slide-art" data-art="contamina">
+              <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 100 Q50 80 100 100 T200 100 V160 H0 Z" fill="var(--sea-700)"/>
+                <path d="M20 115 Q40 100 60 118 T100 116 T140 118 T180 114" stroke="var(--foam)" stroke-width="3" fill="none" opacity=".5"/>
+                <ellipse cx="90" cy="135" rx="26" ry="10" fill="var(--sea-900)" opacity=".5"/>
+                <path d="M70 128 q20 -18 40 0" stroke="var(--seafoam)" stroke-width="3" fill="none"/>
+                <circle cx="50" cy="60" r="3" fill="var(--coral)"/>
+                <circle cx="130" cy="50" r="4" fill="var(--plastic-yellow)"/>
+                <circle cx="160" cy="70" r="2.5" fill="var(--coral)"/>
+              </svg>
+            </div>
+            <div class="slide-copy">
+              <h3 data-i18n="reflex.s3.title">El destino final: el agua</h3>
+              <p data-i18n="reflex.s3.text">Las plantas de tratamiento no filtran todas las partículas. Terminan en ríos, en el mar y, eventualmente, en la cadena alimentaria.</p>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="carousel-controls">
+          <button id="carousel-prev" class="icon-btn" aria-label="Anterior">‹</button>
+          <div class="carousel-dots" id="carousel-dots"></div>
+          <button id="carousel-next" class="icon-btn" aria-label="Siguiente">›</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== NOS AFECTA ===================== -->
+  <section class="section" id="nos-afecta">
+    <div class="section-inner">
+      <h2 data-i18n="afecta.title">¿Cómo nos afecta como consumidores?</h2>
+      <p class="flip-hint" data-i18n="afecta.flipHint">💡 Tocá cada tarjeta para darla vuelta</p>
+      <div class="grid-4">
+        <button type="button" class="flip-card reveal">
+          <span class="flip-card-inner">
+            <span class="flip-face flip-front thumb-grad-1"><span class="mini-icon">🐟</span><h3 data-i18n="afecta.c1.title">A través de los alimentos</h3></span>
+            <span class="flip-face flip-back"><p data-i18n="afecta.c1.text">Los microplásticos ingeridos por peces y mariscos llegan a nuestra mesa. Se detectaron en agua de canilla, sal marina y mariscos de consumo masivo.</p></span>
+          </span>
+        </button>
+        <button type="button" class="flip-card reveal" style="transition-delay:70ms">
+          <span class="flip-card-inner">
+            <span class="flip-face flip-front thumb-grad-2"><span class="mini-icon">💄</span><h3 data-i18n="afecta.c2.title">A través de la piel</h3></span>
+            <span class="flip-face flip-back"><p data-i18n="afecta.c2.text">Partículas de cosméticos con microplásticos pueden penetrar la piel o ser inhaladas. Se investiga su vínculo con disrupciones hormonales.</p></span>
+          </span>
+        </button>
+        <button type="button" class="flip-card reveal" style="transition-delay:140ms">
+          <span class="flip-card-inner">
+            <span class="flip-face flip-front thumb-grad-3"><span class="mini-icon">💧</span><h3 data-i18n="afecta.c3.title">A través del agua</h3></span>
+            <span class="flip-face flip-back"><p data-i18n="afecta.c3.text">El agua potable puede contener microplásticos que los sistemas de tratamiento convencionales no logran retener del todo.</p></span>
+          </span>
+        </button>
+        <button type="button" class="flip-card reveal" style="transition-delay:210ms">
+          <span class="flip-card-inner">
+            <span class="flip-face flip-front thumb-grad-4"><span class="mini-icon">🌊</span><h3 data-i18n="afecta.c4.title">Impacto en el turismo costero</h3></span>
+            <span class="flip-face flip-back"><p data-i18n="afecta.c4.text">Playas con basura plástica generan pérdidas millonarias en turismo y afectan a comunidades costeras cada año.</p></span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== INFORME ===================== -->
+  <section class="section section-dark" id="informe">
+    <div class="section-inner">
+      <h2 data-i18n="informe.title">El informe, en criollo</h2>
+      <p class="section-lead" data-i18n="informe.lead">Todo lo que necesitás entender, explicado simple — para presentar en 3 minutos o leer con calma.</p>
+
+      <div class="accordion" id="accordion">
+        <details open>
+          <summary><span class="q-icon">📏</span><span data-i18n="informe.q1">¿Qué es un microplástico?</span></summary>
+          <p data-i18n="informe.a1">Es cualquier fragmento de plástico de menos de 5 milímetros. Puede fabricarse así a propósito (microesferas en exfoliantes, glitter, agentes de "efecto sedoso" en bases) o formarse cuando un plástico más grande se rompe con el tiempo, el sol o el roce.</p>
+        </details>
+        <details>
+          <summary><span class="q-icon">💄</span><span data-i18n="informe.q2">¿Cómo llega al maquillaje?</span></summary>
+          <p data-i18n="informe.a2">Se agrega intencionalmente porque es barato, da textura suave, brillo o efecto "aterciopelado". Aparece bajo nombres como Polyethylene, Nylon-12, PMMA o Polystyrene en la lista de ingredientes (INCI).</p>
+        </details>
+        <details>
+          <summary><span class="q-icon">⚠️</span><span data-i18n="informe.q3">¿Por qué es un problema si es tan chiquito?</span></summary>
+          <p data-i18n="informe.a3">Porque no se biodegrada. Cada vez que te desmaquillás, esas partículas bajan por el desagüe. Las plantas de tratamiento no están diseñadas para atraparlas todas, así que terminan en ríos y en el mar, donde son ingeridas por peces y otros animales — y eventualmente vuelven a nosotros.</p>
+        </details>
+        <details>
+          <summary><span class="q-icon">🔍</span><span data-i18n="informe.q4">¿Todos los cosméticos tienen microplásticos?</span></summary>
+          <p data-i18n="informe.a4">No. Depende del tipo de producto y de la marca. Por eso esta página incluye una base de datos orientativa: hay categorías de alto riesgo (exfoliantes con microesferas, glitter), de riesgo variable (rímel, sombras en crema) y generalmente más seguras (polvo mineral, labiales con ceras naturales).</p>
+        </details>
+        <details>
+          <summary><span class="q-icon">✅</span><span data-i18n="informe.q5">¿Qué puedo hacer hoy?</span></summary>
+          <p data-i18n="informe.a5">Revisar el INCI antes de comprar, elegir exfoliantes con sal o azúcar en vez de microesferas, priorizar marcas con sellos ecológicos, y llevar tus envases vacíos a puntos de recolección o refill en vez de tirarlos.</p>
+        </details>
+      </div>
+
+      <h3 class="sub-title" data-i18n="informe.docsTitle">Documentos para leer más</h3>
+      <div class="doc-grid" id="doc-grid"><!-- JS --></div>
+    </div>
+  </section>
+
+  <!-- ===================== VIDEOS Y DOCUMENTALES ===================== -->
+  <section class="section" id="videos">
+    <div class="section-inner">
+      <h2 data-i18n="videos.title">Para seguir viendo</h2>
+      <p class="section-lead" data-i18n="videos.lead">Documentales y videos cortos sobre microplásticos y belleza, para compartir en tu presentación o ver por tu cuenta.</p>
+
+      <div class="video-grid" id="video-grid"><!-- JS --></div>
+    </div>
+  </section>
+
+  <!-- ===================== ESCANEAR ===================== -->
+  <section class="section section-dark" id="escanear">
+    <div class="section-inner">
+      <h2 data-i18n="scan.title">Escaneá tu producto</h2>
+      <p class="section-lead" data-i18n="scan.lead">Activá la cámara para enfocar el envase y despues buscalo por nombre en nuestra base para ver el resultado. También podés buscar directo, sin cámara.</p>
+
+      <div class="scanner">
+        <div class="scanner-camera">
+          <video id="scanner-video" playsinline muted></video>
+          <div class="scanner-frame" id="scanner-frame">
+            <div class="scan-line" id="scan-line"></div>
+            <span class="corner tl"></span><span class="corner tr"></span>
+            <span class="corner bl"></span><span class="corner br"></span>
+          </div>
+          <div class="scanner-placeholder" id="scanner-placeholder">
+            <span class="ph-icon">📷</span>
+            <p data-i18n="scan.placeholder">La cámara aparecerá acá</p>
+          </div>
+          <div class="scanner-overlay" id="scanner-overlay" hidden>
+            <div class="spinner"></div>
+            <p id="scanner-overlay-text" data-i18n="scan.analyzing">Analizando envase…</p>
+          </div>
+        </div>
+
+        <div class="scanner-panel">
+          <div class="scanner-buttons">
+            <button id="scan-start" class="btn btn-primary" type="button" data-i18n="scan.start">📷 Activar cámara</button>
+            <button id="scan-stop" class="btn btn-ghost" type="button" data-i18n="scan.stop" hidden>Apagar cámara</button>
+          </div>
+
+          <label class="field-label" for="scan-search" data-i18n="scan.searchLabel">Buscá el producto que fotografiaste</label>
+          <div class="search-row">
+            <input id="scan-search" type="text" autocomplete="off" data-i18n-placeholder="scan.searchPlaceholder" placeholder="Ej: Rímel Maybelline Colossal">
+            <button id="scan-search-btn" class="btn btn-primary" type="button" data-i18n="scan.searchBtn">Analizar</button>
+          </div>
+          <div id="scan-suggestions" class="suggestions" hidden></div>
+
+          <div id="scan-result" class="scan-result" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BASE DE DATOS ===================== -->
+  <section class="section" id="base-datos">
+    <div class="section-inner">
+      <h2 data-i18n="db.title">Base de datos de maquillaje</h2>
+      <p class="section-lead" data-i18n="db.lead">Guía orientativa de más de 40 productos y marcas disponibles en Argentina, según el riesgo típico de contener microplásticos. Siempre verificá el INCI del envase: las fórmulas cambian.</p>
+
+      <div class="db-toolbar">
+        <input id="db-search" type="text" data-i18n-placeholder="db.searchPlaceholder" placeholder="Buscar marca o producto…">
+        <div class="db-filters" id="db-filters">
+          <button class="filter-chip active" data-filter="todos" data-i18n="db.filterAll">Todos</button>
+          <button class="filter-chip risk-alto" data-filter="alto" data-i18n="db.filterHigh">Contiene</button>
+          <button class="filter-chip risk-medio" data-filter="medio" data-i18n="db.filterMed">Depende</button>
+          <button class="filter-chip risk-bajo" data-filter="bajo" data-i18n="db.filterLow">Generalmente seguro</button>
+        </div>
+        <select id="db-category" aria-label="Categoría"></select>
+      </div>
+
+      <p class="db-count" id="db-count"></p>
+      <div class="db-grid" id="db-grid"><!-- JS --></div>
+    </div>
+  </section>
+
+  <!-- product modal -->
+  <div class="modal" id="product-modal">
+    <div class="modal-backdrop" id="product-modal-backdrop"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" id="product-modal-close" aria-label="Cerrar">✕</button>
+      <div id="modal-body"><!-- JS --></div>
+    </div>
+  </div>
+
+  <!-- ===================== MAPA ===================== -->
+  <section class="section section-dark" id="mapa">
+    <div class="section-inner">
+      <h2 data-i18n="map.title">Puntos de reciclaje y refill en Argentina</h2>
+      <p class="section-lead" data-i18n="map.lead">Ubicaciones de referencia por ciudad de programas de recolección y refill de envases. La disponibilidad puede variar: confirmá siempre en el sitio oficial de cada iniciativa antes de ir.</p>
+
+      <div class="map-layout">
+        <div id="leaflet-map"></div>
+        <div class="map-legend">
+          <h3 data-i18n="map.legendTitle">Referencias</h3>
+          <ul id="map-legend-list"></ul>
+          <div class="map-note">
+            <p data-i18n="map.note">¿Conocés un punto que no está? Contalo en <a href="#opiniones">Opiniones</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROPUESTA ===================== -->
+  <section class="section" id="propuesta">
+    <div class="section-inner">
+      <h2 data-i18n="prop.title">Propuesta: hacia una rutina sin microplásticos</h2>
+      <p class="section-lead" data-i18n="prop.lead">No se trata de dejar de usar maquillaje, sino de elegir mejor. Estas son acciones concretas, de menor a mayor esfuerzo.</p>
+
+      <div class="steps" id="prop-steps"><!-- JS --></div>
+
+      <h3 class="sub-title" data-i18n="prop.brandsTitle">Marcas con formulación más limpia (Argentina)</h3>
+      <div class="brand-grid" id="brand-grid"><!-- JS --></div>
+
+      <div class="proposal-comments">
+        <h3 class="sub-title" data-i18n="prop.commentsTitle">Comentá sobre marcas o productos</h3>
+        <p class="section-lead small" data-i18n="prop.commentsLead">Dejá tu experiencia con una marca puntual — se suma a los comentarios de cada producto en la base de datos.</p>
+        <form id="proposal-comment-form" class="comment-form">
+          <input id="pc-product" type="text" data-i18n-placeholder="prop.commentProduct" placeholder="Marca o producto" required>
+          <textarea id="pc-text" rows="2" data-i18n-placeholder="prop.commentText" placeholder="Tu comentario…" required></textarea>
+          <button class="btn btn-primary" type="submit" data-i18n="prop.commentSend">Publicar</button>
+        </form>
+        <div id="proposal-comment-list" class="comment-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ACTIVIDADES ===================== -->
+  <section class="section section-dark" id="actividades">
+    <div class="section-inner">
+      <h2 data-i18n="quiz.title">Jugá y aprendé</h2>
+      <p class="section-lead" data-i18n="quiz.lead">Un mini quiz y un desafío rápido de verdadero o falso para poner a prueba lo que aprendiste.</p>
+
+      <div class="activity-tabs">
+        <button class="activity-tab active" data-tab="quiz" data-i18n="quiz.tabQuiz">🫧 Preguntále a Gota</button>
+        <button class="activity-tab" data-tab="vf" data-i18n="quiz.tabVF">Verdadero o falso</button>
+      </div>
+
+      <div class="activity-panel" id="panel-quiz">
+        <div class="quiz-box" id="quiz-box"></div>
+      </div>
+
+      <div class="activity-panel" id="panel-vf" hidden>
+        <div class="vf-box" id="vf-box"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== OPINIONES ===================== -->
+  <section class="section" id="opiniones">
+    <div class="section-inner">
+      <h2 data-i18n="op.title">¿Qué te pareció la página?</h2>
+      <p class="section-lead" data-i18n="op.lead">Tu opinión nos ayuda a mejorar esta propuesta.</p>
+
+      <div class="opinions-layout">
+        <form id="opinion-form" class="opinion-form">
+          <label data-i18n="op.name">Tu nombre (opcional)</label>
+          <input id="op-name" type="text" data-i18n-placeholder="op.namePlaceholder" placeholder="Anónimo">
+
+          <label data-i18n="op.rating">Puntuación</label>
+          <div class="star-input" id="star-input">
+            <button type="button" data-star="1">★</button>
+            <button type="button" data-star="2">★</button>
+            <button type="button" data-star="3">★</button>
+            <button type="button" data-star="4">★</button>
+            <button type="button" data-star="5">★</button>
+          </div>
+
+          <label data-i18n="op.comment">Comentario</label>
+          <textarea id="op-comment" rows="3" required data-i18n-placeholder="op.commentPlaceholder" placeholder="Contanos qué te gustó o qué mejorarías…"></textarea>
+
+          <button class="btn btn-primary" type="submit" data-i18n="op.send">Enviar opinión</button>
+        </form>
+
+        <div class="opinions-summary">
+          <div class="avg-score">
+            <span id="avg-number">–</span>
+            <div class="avg-stars" id="avg-stars"></div>
+            <p id="avg-count" data-i18n="op.noReviews">Todavía no hay opiniones</p>
+          </div>
+          <div class="opinions-list" id="opinions-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p data-i18n="footer.credit">Proyecto educativo creado para el evento <strong>HackaPUM — Chicas en Tecnología</strong>, 2026.</p>
+    <p class="footer-small" data-i18n="footer.disclaimer">La información de esta página es orientativa. Verificá siempre los ingredientes en el envase y consultá <a href="https://www.anmat.gob.ar" target="_blank" rel="noopener">ANMAT</a>.</p>
+    <p class="footer-small">Inspirado en el proyecto <a href="https://cet-programacion-asistida-con-ia-2026.github.io/proyecto-equipo12-grupoB/" target="_blank" rel="noopener">Maquillaje &amp; Microplásticos — Equipo 12</a>.</p>
+  </div>
+</footer>
+
+<div class="chat-widget" id="chat-widget">
+  <div class="chat-panel" id="chat-panel" hidden>
+    <div class="chat-header">
+      <svg class="chat-mascot" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M32 6 C42 22 50 32 50 42 A18 18 0 0 1 14 42 C14 32 22 22 32 6 Z" fill="#f2ecff"/>
+        <circle cx="22" cy="30" r="4" fill="#ffffff" opacity=".55"/>
+        <circle cx="25" cy="40" r="3.4" fill="#3a2a63"/>
+        <circle cx="39" cy="40" r="3.4" fill="#3a2a63"/>
+        <path d="M24 47 Q32 53 40 47" stroke="#3a2a63" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <strong id="chat-name">Gota</strong>
+        <span id="chat-status">En línea · te ayudo con tus dudas</span>
+      </div>
+      <button class="icon-btn" id="chat-close" type="button" aria-label="Cerrar chat">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-suggestions" id="chat-suggestions"></div>
+    <form class="chat-input-row" id="chat-form">
+      <input id="chat-input" type="text" autocomplete="off" placeholder="Preguntame algo…">
+      <button class="btn btn-primary" type="submit" aria-label="Enviar">Enviar</button>
+    </form>
+  </div>
+  <button class="chat-toggle" id="chat-toggle" type="button" aria-label="Abrir asistente EcoBelleza" aria-expanded="false">
+    <svg class="chat-mascot" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M32 6 C42 22 50 32 50 42 A18 18 0 0 1 14 42 C14 32 22 22 32 6 Z" fill="#f2ecff"/>
+      <circle cx="22" cy="30" r="4" fill="#ffffff" opacity=".55"/>
+      <circle cx="25" cy="40" r="3.4" fill="#3a2a63"/>
+      <circle cx="39" cy="40" r="3.4" fill="#3a2a63"/>
+      <path d="M24 47 Q32 53 40 47" stroke="#3a2a63" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    </svg>
+    <span class="chat-toggle-pulse" aria-hidden="true"></span>
+  </button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
